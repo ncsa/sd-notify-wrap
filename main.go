@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"syscall"
 	"time"
 
 	"github.com/coreos/go-systemd/daemon"
@@ -38,7 +39,8 @@ func main() {
 	err = cmd.Wait()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to run %s: %v\n", prog, err)
-		os.Exit(2)
+		code := err.(*exec.ExitError).Sys().(syscall.WaitStatus).ExitStatus()
+		os.Exit(code)
 	}
 	os.Exit(0)
 }
