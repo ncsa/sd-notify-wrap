@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -10,13 +11,20 @@ import (
 	"github.com/coreos/go-systemd/daemon"
 )
 
+var readydelay time.Duration
+
+func init() {
+	flag.DurationVar(&readydelay, "delay", 2*time.Second, "How long before notifying systemd that the proccess is ready")
+}
+
 func main() {
-	if len(os.Args) == 1 {
+	flag.Parse()
+	if len(flag.Args()) == 0 {
 		fmt.Fprintf(os.Stderr, "Usage %s cmd [args]\n", os.Args[0])
 		os.Exit(1)
 	}
-	prog := os.Args[1]
-	args := os.Args[2:]
+	prog := flag.Args()[0]
+	args := flag.Args()[1:]
 
 	cmd := exec.Command(prog, args...)
 	cmd.Stdout = os.Stdout
@@ -31,8 +39,8 @@ func main() {
 	fmt.Fprintf(os.Stderr, "Pid: %d\n", cmd.Process.Pid)
 
 	go func() {
-		time.Sleep(2 * time.Second)
-		fmt.Fprintf(os.Stderr, "Survived for 2 seconds!\n")
+		time.Sleep(readydelay)
+		fmt.Fprintf(os.Stderr, "Survived for %s!\n", readydelay)
 		daemon.SdNotify(false, "READY=1") //
 	}()
 
