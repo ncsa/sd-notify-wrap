@@ -36,11 +36,11 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Failed to start %s: %v\n", prog, err)
 		os.Exit(2)
 	}
-	fmt.Fprintf(os.Stderr, "Pid: %d\n", cmd.Process.Pid)
+	fmt.Fprintf(os.Stderr, "child pid: %d\n", cmd.Process.Pid)
 
 	go func() {
 		time.Sleep(readydelay)
-		fmt.Fprintf(os.Stderr, "Survived for %s!\n", readydelay)
+		fmt.Fprintf(os.Stderr, "survived for %s!\n", readydelay)
 		daemon.SdNotify(false, "READY=1") //
 	}()
 
